@@ -1,9 +1,9 @@
 //variables
 :root {
-  --linear-gradient1: linear-gradient(rgba(0, 0, 0, 0.5), transparent);
+  --linear-gradient1: linear-gradient(rgba(0, 0, 0, 0.2), transparent);
   --white: #fff;
   --grey: rgb(248, 243, 243);
-  --blue: rgb(18, 60, 201);
+  --blue: rgba(18, 61, 201, 0.888);
 }
 
 //mixins
@@ -40,6 +40,7 @@ body {
   margin: 0 auto;
   padding-top: 56.25%;
   top: 5rem;
+
   &.fullscreen {
     height: 100%;
     top: 0;
@@ -56,10 +57,12 @@ body {
   &__wrapper {
     width: 100%;
     position: absolute;
-    bottom: 0;
+    bottom: -2.2rem;
     left: 0;
     right: 0;
+    opacity: 0;
     padding-bottom: 0.7rem;
+    pointer-events: none;
     &::before {
       content: "";
       width: 100%;
@@ -70,9 +73,15 @@ body {
       z-index: -1;
     }
   }
+  &.show-controls .video__wrapper {
+    bottom: 0;
+    pointer-events: auto;
+    opacity: 1;
+  }
 }
 input[type="range"] {
   height: 0.5rem;
+  cursor: pointer;
 }
 .video__control,
 .video__duration,
@@ -123,19 +132,19 @@ button {
     background-color: var(--blue);
     position: relative;
     cursor: pointer;
-    transition: all 0.3s;
+    width: 0;
     &::after {
       content: "";
-      width: 2rem;
-      height: 2rem;
+      width: 1.5rem;
+      height: 1.5rem;
       position: absolute;
-      left: 98%;
+      right: 0;
       border-radius: 50%;
       background-color: inherit;
       top: 50%;
       transform: translateY(-50%);
       opacity: 0;
-      transition: opacity 0.3s;
+      transition: opacity 0.2s;
     }
   }
   &:hover .progress__bar::after {
