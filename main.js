@@ -17,6 +17,8 @@ const progress = document.querySelector(".progress");
 const progressBar = document.querySelector(".progress__bar");
 const crtTime = document.querySelector(".current-time");
 const videoLength = document.querySelector(".total-duration");
+const playBack = document.querySelector(".playback__speed");
+const playOption = document.querySelectorAll(".play-back");
 let timer;
 const formatTimer = (time) => {
   let seconds = Math.floor(time % 60),
@@ -48,6 +50,15 @@ container.addEventListener("mousemove", () => {
 // video.addEventListener("loadeddata",(e) => {
 //   console.log(e.target.duration);
 // });
+playBack.addEventListener("click", (e) => {
+  playBack.classList.toggle("show");
+});
+
+playOption.forEach((el) => {
+  el.addEventListener("click", (e) => {
+    video.playbackRate = e.target.dataset.speed;
+  });
+});
 
 video.addEventListener("timeupdate", function (e) {
   const { currentTime, duration } = e.target;
