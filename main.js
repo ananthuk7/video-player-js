@@ -1,17 +1,16 @@
 import "./style.scss";
+import { formatTimer, hideControls } from "./helper";
+import { eventPlayed, removeEventPlayed } from "./globalEvent";
 
 const body = document.querySelector("body");
 const container = document.querySelector(".video");
 const video = container.querySelector("video");
-const play = document.querySelector(".video__play");
-const playicon = document.querySelector(".play-button");
-const fullscreen = document.querySelector(".video__fullscreen");
-const shrinkIcon = document.querySelector(".video__fullscreen i");
-const forward = document.querySelector(".video__forward");
-const backward = document.querySelector(".video__backward");
-const pictureInMode = document.querySelector(".video__picture");
-const muted = document.querySelector(".sound");
-const mutedIcon = muted.querySelector("i");
+const play = document.querySelector(".video__play i");
+const fullscreen = document.querySelector(".video__fullscreen i");
+const forward = document.querySelector(".video__forward i");
+const backward = document.querySelector(".video__backward i");
+const pictureInMode = document.querySelector(".video__picture i");
+const muted = document.querySelector(".sound i");
 const volumeRange = document.querySelector(".video__volume");
 const progress = document.querySelector(".progress");
 const progressBar = document.querySelector(".progress__bar");
@@ -19,122 +18,124 @@ const crtTime = document.querySelector(".current-time");
 const videoLength = document.querySelector(".total-duration");
 const playBack = document.querySelector(".playback__speed");
 const playOption = document.querySelectorAll(".play-back");
-let timer;
-const formatTimer = (time) => {
-  let seconds = Math.floor(time % 60),
-    miniutes = Math.floor((time / 60) % 60),
-    hours = Math.floor(time / 3600);
-  seconds = seconds > 10 ? seconds : `0${seconds}`;
-  miniutes = miniutes > 10 ? miniutes : `0${miniutes}`;
-  hours = hours > 10 ? hours : `0${hours}`;
-  if (hours == 0) return `${miniutes} : ${seconds}`;
-  return `${hours} : ${miniutes}: ${seconds}`;
+
+//initail functions
+
+hideControls();
+const setVolume = (volume, range) => {
+  video.volume = volume;
+  volumeRange.value = range;
 };
-const init = () => {
+const classForExitFullscreen = () => {
+  body.classList.remove("padd__body");
+  container.classList.remove("fullscreen");
+  fullscreen.classList.replace("fa-compress", "fa-expand");
+};
+
+
+
+//functions
+
+const addVideoFullDuration = () => {
   videoLength.innerText = formatTimer(video.duration);
 };
-init();
-const hideControls = () => {
-  if (video.paused) return;
-  timer = setTimeout(() => {
-    container.classList.remove("show-controls");
-  }, 3000);
-};
-hideControls();
-container.addEventListener("mousemove", () => {
-  container.classList.add("show-controls");
-  clearTimeout(timer);
-  hideControls();
-});
-
-// video.addEventListener("loadeddata",(e) => {
-//   console.log(e.target.duration);
-// });
-playBack.addEventListener("click", (e) => {
+const showPlayBack = () => {
   playBack.classList.toggle("show");
-});
-
-playOption.forEach((el) => {
-  el.addEventListener("click", (e) => {
-    video.playbackRate = e.target.dataset.speed;
-  });
-});
-
-video.addEventListener("timeupdate", function (e) {
+};
+const playBackSpeed = (e) => {
+  video.playbackRate = e.target.dataset.speed;
+};
+const updateProgressAndCurrentTime = (e) => {
   const { currentTime, duration } = e.target;
   let totalWidthPer = (currentTime / duration) * 100;
   progressBar.style.width = `${totalWidthPer}%`;
   crtTime.innerText = formatTimer(currentTime);
-});
-play.addEventListener("click", function () {
+};
+const videoPlayOrPaused = () => {
   video.paused ? video.play() : video.pause();
-});
-video.addEventListener("play", () => {
-  progressBar.style.width = playicon.classList.replace("fa-play", "fa-pause");
-});
-video.addEventListener("pause", () => {
-  playicon.classList.replace("fa-pause", "fa-play");
-});
-
-forward.addEventListener("click", function () {
+};
+const changeplay = () => {
+  return play.classList.replace("fa-play", "fa-pause");
+};
+const changePauseIcon = () => {
+  return play.classList.replace("fa-pause", "fa-play");
+};
+const increaseCurrentTime = () => {
   video.currentTime += 5;
-});
-backward.addEventListener("click", function () {
+};
+const decreaseCurrentTime = () => {
   video.currentTime -= 5;
-});
-muted.addEventListener("click", function () {
-  video.volume = 0;
-  volumeRange.value = 0;
-  if (mutedIcon.classList.contains("fa-volume-high") && video.volume == 0) {
-    mutedIcon.classList.replace("fa-volume-high", "fa-volume-xmark");
+};
+const videoVolumeMuted = () => {
+  setVolume(0, 0);
+  if (muted.classList.contains("fa-volume-high") && video.volume == 0) {
+    muted.classList.replace("fa-volume-high", "fa-volume-xmark");
   } else {
-    mutedIcon.classList.replace("fa-volume-xmark", "fa-volume-high");
-    volumeRange.value = 0.5;
-    video.volume = 0.5;
+    muted.classList.replace("fa-volume-xmark", "fa-volume-high");
+    setVolume(0.5, 0.5);
   }
-});
-
-fullscreen.addEventListener("click", () => {
-  /* Adding a class to the body and container. */
+};
+const videoFullScreen = () => {
   body.classList.add("padd__body");
   container.classList.add("fullscreen");
   if (document.fullscreenElement) {
-    body.classList.remove("padd__body");
-    container.classList.remove("fullscreen");
-    shrinkIcon.classList.replace("fa-compress", "fa-expand");
+    classForExitFullscreen();
     return document.exitFullscreen();
   }
-  shrinkIcon.classList.replace("fa-expand", "fa-compress");
+  fullscreen.classList.replace("fa-expand", "fa-compress");
   container.requestFullscreen();
-});
-
-pictureInMode.addEventListener("click", function () {
+};
+const videoPictureInMode = () => {
+  if (document.pictureInPictureElement) {
+    return document.exitPictureInPicture();
+  }
+  if (document.fullscreenElement) {
+    classForExitFullscreen();
+    document.exitFullscreen();
+  }
   video.requestPictureInPicture();
-});
-
-volumeRange.addEventListener("input", function (e) {
+};
+const changeVideoVlumeByRange = () => {
   video.volume = e.target.value;
   video.volume === 0
-    ? mutedIcon.classList.replace("fa-volume-high", "fa-volume-xmark")
-    : mutedIcon.classList.replace("fa-volume-xmark", "fa-volume-high");
-});
+    ? muted.classList.replace("fa-volume-high", "fa-volume-xmark")
+    : muted.classList.replace("fa-volume-xmark", "fa-volume-high");
+};
 
-function moveProgress(e) {
-  console.log("event activated");
+const moveProgress = (e) => {
   let timelineWidth = progress.clientWidth;
   let time = (e.offsetX / timelineWidth) * video.duration;
   video.currentTime = time;
-}
+};
+const changeProgressBarByClick = (e) => {
+  let timelineWidth = progress.clientWidth;
+  let time = (e.offsetX / timelineWidth) * video.duration;
+  video.currentTime = time;
+};
 
+
+
+//events
+
+eventPlayed(video, "loadeddata", addVideoFullDuration);
+eventPlayed(playBack, "click", showPlayBack);
+playOption.forEach((el) => {
+  eventPlayed(el, "click", playBackSpeed);
+});
+eventPlayed(video, "timeupdate", updateProgressAndCurrentTime);
+eventPlayed(play, "click", videoPlayOrPaused);
+eventPlayed(video, "play", changeplay);
+eventPlayed(video, "pause", changePauseIcon);
+eventPlayed(forward, "click", increaseCurrentTime);
+eventPlayed(backward, "click", decreaseCurrentTime);
+eventPlayed(muted, "click", videoVolumeMuted);
+eventPlayed(fullscreen, "click", videoFullScreen);
+eventPlayed(pictureInMode, "click", videoPictureInMode);
+eventPlayed(volumeRange, "input", changeVideoVlumeByRange);
 progress.addEventListener("mousedown", function () {
-  progress.addEventListener("mousemove", moveProgress);
+  eventPlayed(progress, "mousemove", moveProgress);
 });
 progress.addEventListener("mouseup", function () {
-  progress.removeEventListener("mousemove", moveProgress);
+  removeEventPlayed(progress, "mousemove", moveProgress);
 });
-
-progress.addEventListener("click", function (e) {
-  let timelineWidth = progress.clientWidth;
-  let time = (e.offsetX / timelineWidth) * video.duration;
-  video.currentTime = time;
-});
+eventPlayed(progress, "click", changeProgressBarByClick);

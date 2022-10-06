@@ -106,10 +106,10 @@ button {
   border: none;
   outline: none;
   background: none;
-  cursor: pointer;
   & i {
     font-size: 1.8rem;
     color: var(--white);
+    cursor: pointer;
   }
 }
 .current-time,
